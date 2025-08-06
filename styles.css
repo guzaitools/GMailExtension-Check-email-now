@@ -1,0 +1,194 @@
+/* Gmail POP3 Check Button Styles */
+
+.pop3-check-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 8px;
+    min-height: 36px;
+    white-space: nowrap;
+}
+
+.pop3-check-btn:hover {
+    background: #1765d9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.pop3-check-btn:active {
+    background: #1557c2;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+.pop3-check-btn:disabled {
+    background: #dadce0;
+    color: #5f6368;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.pop3-check-btn svg {
+    flex-shrink: 0;
+}
+
+/* Spinning animation for loading state */
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Button container for header placement */
+.pop3-button-container {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 16px;
+}
+
+/* Notification styles */
+.pop3-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000;
+    max-width: 350px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease;
+}
+
+.pop3-success {
+    background: #e8f5e8;
+    color: #137333;
+    border-left: 4px solid #34a853;
+}
+
+.pop3-error {
+    background: #fce8e6;
+    color: #d93025;
+    border-left: 4px solid #ea4335;
+}
+
+.pop3-warning {
+    background: #fef7e0;
+    color: #e37400;
+    border-left: 4px solid #fbbc04;
+}
+
+.pop3-info {
+    background: #e8f0fe;
+    color: #1a73e8;
+    border-left: 4px solid #4285f4;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .pop3-check-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        margin: 0 4px;
+    }
+    
+    .pop3-check-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .pop3-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .pop3-check-btn {
+        background: #8ab4f8;
+        color: #202124;
+    }
+    
+    .pop3-check-btn:hover {
+        background: #93baf9;
+    }
+    
+    .pop3-check-btn:active {
+        background: #7cacf8;
+    }
+    
+    .pop3-check-btn:disabled {
+        background: #3c4043;
+        color: #9aa0a6;
+    }
+    
+    .pop3-success {
+        background: #1e3e2a;
+        color: #81c995;
+        border-left-color: #34a853;
+    }
+    
+    .pop3-error {
+        background: #3b2a2a;
+        color: #f28b82;
+        border-left-color: #ea4335;
+    }
+    
+    .pop3-warning {
+        background: #3b3425;
+        color: #fdd663;
+        border-left-color: #fbbc04;
+    }
+    
+    .pop3-info {
+        background: #2a3441;
+        color: #8ab4f8;
+        border-left-color: #4285f4;
+    }
+}
+
+/* Gmail-specific integration styles */
+[role="toolbar"] .pop3-check-btn {
+    margin-left: 8px;
+}
+
+/* Ensure button doesn't interfere with Gmail's layout */
+.pop3-check-btn {
+    z-index: 100;
+    position: relative;
+}
+
+/* Special styling when in Gmail's compose area */
+[role="dialog"] .pop3-check-btn {
+    font-size: 13px;
+    padding: 6px 12px;
+    margin: 0 4px;
+}
