@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail POP3 Checker</title>
+    <style>
+        body {
+            width: 280px;
+            min-height: 200px;
+            margin: 0;
+            padding: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .header h3 {
+            margin: 0 0 8px 0;
+            color: #1a73e8;
+            font-size: 16px;
+        }
+        
+        .header p {
+            margin: 0;
+            color: #5f6368;
+            font-size: 12px;
+        }
+        
+        .action-button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 6px;
+            background: #1a73e8;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .action-button:hover {
+            background: #1765d9;
+        }
+        
+        .action-button:disabled {
+            background: #dadce0;
+            color: #5f6368;
+            cursor: not-allowed;
+        }
+        
+        .secondary-button {
+            background: transparent;
+            color: #1a73e8;
+            border: 1px solid #dadce0;
+        }
+        
+        .secondary-button:hover {
+            background: #f8f9fa;
+            border-color: #1a73e8;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .status.success {
+            background: #e8f5e8;
+            color: #137333;
+        }
+        
+        .status.info {
+            background: #e8f0fe;
+            color: #1a73e8;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #dadce0;
+        }
+        
+        .footer a {
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 11px;
+        }
+        
+        .footer a:hover {
+            color: #1a73e8;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h3>Gmail POP3 Checker</h3>
+        <p>Quick access to check POP3 email accounts</p>
+    </div>
+    
+    <div id="main-content">
+        <button id="open-gmail" class="action-button">
+            Open Gmail
+        </button>
+        
+        <button id="check-pop3" class="action-button" disabled>
+            Check POP3 Mail Now
+        </button>
+        
+        <div id="status" class="status hidden"></div>
+        
+        <button id="settings" class="action-button secondary-button">
+            Extension Settings
+        </button>
+    </div>
+    
+    <div class="footer">
+        <a href="#" id="help-link">Need help?</a>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
