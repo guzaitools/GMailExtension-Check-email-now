@@ -14,7 +14,17 @@ A Chrome extension that adds a convenient button to Gmail for quickly checking P
 
 ## Installation
 
-### From Source (Developer Mode)
+### Firefox Installation
+
+1. **Download or Clone** this repository to your local machine
+2. **Open Firefox** and navigate to `about:debugging`
+3. **Click "This Firefox"** in the left sidebar
+4. **Click "Load Temporary Add-on"** button
+5. **Select the manifest.json file** from the extension folder
+6. **Grant Permissions** when prompted to access Gmail
+7. **Navigate to Gmail** and look for the "Check POP3 Mail" button
+
+### Chrome Installation (Alternative)
 
 1. **Download or Clone** this repository to your local machine
 2. **Open Chrome** and navigate to `chrome://extensions/`
@@ -25,7 +35,7 @@ A Chrome extension that adds a convenient button to Gmail for quickly checking P
 
 ### Prerequisites
 
-- Google Chrome browser (version 88 or higher)
+- Firefox browser (version 57 or higher) or Chrome browser (version 88 or higher)
 - Gmail account with POP3 accounts configured
 - POP3 email accounts set up in Gmail Settings > Accounts and Import
 
@@ -86,9 +96,10 @@ gmail-pop3-checker/
 - `https://mail.google.com/*`: Host permission for Gmail
 
 ### Browser Compatibility
-- **Chrome**: Version 88+ (Manifest V3 support)
-- **Edge**: Version 88+ (Chromium-based)
-- **Other Browsers**: Not supported (Chrome extension specific)
+- **Firefox**: Version 57+ (Primary support with Manifest V2)
+- **Chrome**: Version 88+ (Alternative support)
+- **Edge**: Version 88+ (Chromium-based, alternative support)
+- **Other Browsers**: Not supported
 
 ### Security & Privacy
 - Extension only accesses Gmail pages when active
@@ -112,9 +123,11 @@ gmail-pop3-checker/
 
 ### Extension Errors
 1. **Console Logs**: Check browser console (F12) for error messages
-2. **Reload Extension**: Disable and re-enable in `chrome://extensions/`
+2. **Reload Extension**: 
+   - Firefox: Go to `about:debugging` and reload the extension
+   - Chrome: Disable and re-enable in `chrome://extensions/`
 3. **Clear Cache**: Clear browser cache and cookies for Gmail
-4. **Update Chrome**: Ensure you're using a recent version of Chrome
+4. **Update Browser**: Ensure you're using a recent version of Firefox or Chrome
 
 ## Development
 
@@ -124,7 +137,13 @@ gmail-pop3-checker/
 git clone <repository-url>
 cd gmail-pop3-checker
 
-# Load in Chrome
+# Load in Firefox (Primary)
+# 1. Open about:debugging
+# 2. Click "This Firefox"
+# 3. Click "Load Temporary Add-on"
+# 4. Select manifest.json
+
+# Alternative: Load in Chrome
 # 1. Open chrome://extensions/
 # 2. Enable Developer mode
 # 3. Click "Load unpacked"
@@ -133,15 +152,18 @@ cd gmail-pop3-checker
 
 ### Making Changes
 1. Edit source files as needed
-2. Go to `chrome://extensions/`
-3. Click the refresh icon for this extension
-4. Test changes in Gmail
+2. Reload the extension:
+   - **Firefox**: Go to `about:debugging` and click "Reload" 
+   - **Chrome**: Go to `chrome://extensions/` and click the refresh icon
+3. Test changes in Gmail
 
 ### Build for Production
 The extension is ready to use as-is. For distribution:
 1. Create extension icons (16, 32, 48, 128 pixel sizes)
 2. Test thoroughly across different Gmail interfaces
-3. Package as .crx file or submit to Chrome Web Store
+3. Package for distribution:
+   - **Firefox**: Create .xpi file or submit to Firefox Add-ons
+   - **Chrome**: Package as .crx file or submit to Chrome Web Store
 
 ## Contributing
 
@@ -172,7 +194,7 @@ If you encounter issues:
 1. **Check Prerequisites**: Ensure POP3 accounts are configured in Gmail
 2. **Review Troubleshooting**: Follow the troubleshooting guide above
 3. **Browser Console**: Check for JavaScript errors in browser console
-4. **Extension Console**: Check extension console in `chrome://extensions/`
+4. **Extension Console**: Check extension console (`about:debugging` for Firefox, `chrome://extensions/` for Chrome)
 
 ## Future Enhancements
 

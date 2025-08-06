@@ -78,6 +78,20 @@
         }
     }
 
+    // Listen for messages from background script
+    const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+    if (browserAPI && browserAPI.runtime && browserAPI.runtime.onMessage) {
+        browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            if (message.action === 'triggerPOP3Check') {
+                handlePOP3Check();
+                sendResponse({ success: true });
+            } else if (message.action === 'autoTriggerPOP3Check') {
+                handlePOP3Check();
+            }
+            return true;
+        });
+    }
+
     // Navigate to accounts and import settings
     function navigateToAccountsSettings() {
         return new Promise((resolve) => {

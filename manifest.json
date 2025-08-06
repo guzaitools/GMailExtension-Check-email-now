@@ -1,13 +1,12 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Gmail POP3 Check Button",
   "version": "1.0.0",
   "description": "Add a button to quickly check POP3 email accounts in Gmail",
   "permissions": [
     "activeTab",
-    "scripting"
-  ],
-  "host_permissions": [
+    "contextMenus",
+    "storage",
     "https://mail.google.com/*"
   ],
   "content_scripts": [
@@ -19,16 +18,32 @@
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"],
+    "persistent": false
   },
-  "action": {
+  "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "Gmail POP3 Checker"
+    "default_title": "Gmail POP3 Checker",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    "icons/*"
+  ],
+  "applications": {
+    "gecko": {
+      "id": "gmail-pop3-checker@example.com",
+      "strict_min_version": "57.0"
+    }
   }
 }

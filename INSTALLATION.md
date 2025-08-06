@@ -1,6 +1,15 @@
 # Quick Installation Guide
 
-## Install the Extension
+## Install the Extension (Firefox)
+
+1. **Download** this folder to your computer
+2. **Open Firefox** and go to `about:debugging`
+3. **Click "This Firefox"** in the left sidebar
+4. **Click "Load Temporary Add-on"** button
+5. **Select the manifest.json file** from this folder
+6. **Done!** The extension is now installed
+
+## Install the Extension (Chrome - Alternative)
 
 1. **Download** this folder to your computer
 2. **Open Chrome** and go to `chrome://extensions/`
@@ -26,6 +35,6 @@
 
 - Make sure POP3 accounts are configured in Gmail first
 - Try refreshing Gmail if button doesn't appear
-- Check that extension is enabled in `chrome://extensions/`
+- Check that extension is enabled in `about:debugging` (Firefox) or `chrome://extensions/` (Chrome)
 
 That's it! You can now check your POP3 mail with one click.

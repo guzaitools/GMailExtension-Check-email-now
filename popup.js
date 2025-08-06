@@ -1,4 +1,7 @@
-// Gmail POP3 Checker Popup Script
+// Gmail POP3 Checker Popup Script (Firefox)
+// Use browser namespace for Firefox compatibility
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 document.addEventListener('DOMContentLoaded', function() {
     const openGmailBtn = document.getElementById('open-gmail');
     const checkPOP3Btn = document.getElementById('check-pop3');
@@ -16,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     helpLink.addEventListener('click', showHelp);
 
     function checkGmailTab() {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const currentTab = tabs[0];
             
             if (currentTab && currentTab.url && currentTab.url.includes('mail.google.com')) {
@@ -32,15 +35,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function openGmail() {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const currentTab = tabs[0];
             
             if (currentTab && currentTab.url && currentTab.url.includes('mail.google.com')) {
                 // Refresh current Gmail tab
-                chrome.tabs.reload(currentTab.id);
+                browserAPI.tabs.reload(currentTab.id);
             } else {
                 // Open new Gmail tab
-                chrome.tabs.create({ url: 'https://mail.google.com' });
+                browserAPI.tabs.create({ url: 'https://mail.google.com' });
             }
             
             window.close();
@@ -52,38 +55,49 @@ document.addEventListener('DOMContentLoaded', function() {
         checkPOP3Btn.textContent = 'Checking...';
         showStatus('Triggering POP3 check...', 'info');
 
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const currentTab = tabs[0];
             
             if (currentTab && currentTab.url && currentTab.url.includes('mail.google.com')) {
                 // Send message to content script to trigger POP3 check
-                chrome.tabs.sendMessage(currentTab.id, { 
+                const sendMessage = browserAPI.tabs.sendMessage(currentTab.id, { 
                     action: 'triggerPOP3Check' 
-                }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        // Content script might not be loaded, inject it
-                        chrome.scripting.executeScript({
-                            target: { tabId: currentTab.id },
-                            files: ['content.js']
-                        }, () => {
-                            // Try again after injection
-                            setTimeout(() => {
-                                chrome.tabs.sendMessage(currentTab.id, { 
-                                    action: 'triggerPOP3Check' 
-                                });
-                            }, 500);
-                        });
-                    }
-                    
-                    checkPOP3Btn.disabled = false;
-                    checkPOP3Btn.textContent = 'Check POP3 Mail Now';
-                    showStatus('POP3 check initiated!', 'success');
-                    
-                    // Close popup after a delay
-                    setTimeout(() => {
-                        window.close();
-                    }, 1500);
                 });
+
+                // Handle both Promise-based (Firefox) and callback-based (Chrome) APIs
+                if (sendMessage && sendMessage.then) {
+                    // Firefox Promise-based API
+                    sendMessage.then(() => {
+                        checkPOP3Btn.disabled = false;
+                        checkPOP3Btn.textContent = 'Check POP3 Mail Now';
+                        showStatus('POP3 check initiated!', 'success');
+                        
+                        setTimeout(() => {
+                            window.close();
+                        }, 1500);
+                    }).catch((error) => {
+                        // Content script might not be loaded, refresh page
+                        browserAPI.tabs.reload(currentTab.id);
+                        window.close();
+                    });
+                } else {
+                    // Chrome callback-based API
+                    setTimeout(() => {
+                        if (browserAPI.runtime.lastError) {
+                            // Content script might not be loaded, refresh page
+                            browserAPI.tabs.reload(currentTab.id);
+                        } else {
+                            showStatus('POP3 check initiated!', 'success');
+                        }
+                        
+                        checkPOP3Btn.disabled = false;
+                        checkPOP3Btn.textContent = 'Check POP3 Mail Now';
+                        
+                        setTimeout(() => {
+                            window.close();
+                        }, 1500);
+                    }, 100);
+                }
             } else {
                 checkPOP3Btn.disabled = false;
                 checkPOP3Btn.textContent = 'Check POP3 Mail Now';
