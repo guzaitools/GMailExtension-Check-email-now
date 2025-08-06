@@ -51,22 +51,32 @@
         button.disabled = true;
 
         try {
+            console.log('Starting POP3 check process...');
+            
             // Navigate to the accounts settings page
             await navigateToAccountsSettings();
             
-            // Wait a moment for the page to load
+            console.log('Navigation complete, waiting for page to load...');
+            
+            // Wait longer for the page to fully load and render
             setTimeout(() => {
+                console.log('Page should be loaded, triggering POP3 check...');
                 triggerPOP3Check();
                 
-                // Restore button state
-                button.innerHTML = originalText;
-                button.disabled = false;
-                
-                // Navigate back to inbox
+                // Wait a bit before restoring button state to see if check worked
                 setTimeout(() => {
-                    window.location.href = 'https://mail.google.com/mail/u/0/#inbox';
-                }, 1000);
-            }, 2000);
+                    // Restore button state
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    
+                    console.log('POP3 check process complete, returning to inbox...');
+                    
+                    // Navigate back to inbox
+                    setTimeout(() => {
+                        window.location.href = 'https://mail.google.com/mail/u/0/#inbox';
+                    }, 2000);
+                }, 3000);
+            }, 3000);
             
         } catch (error) {
             console.error('Error checking POP3 mail:', error);
@@ -97,17 +107,36 @@
         return new Promise((resolve) => {
             const settingsUrl = 'https://mail.google.com/mail/u/0/#settings/accounts';
             
-            if (window.location.href !== settingsUrl) {
+            console.log('Current URL:', window.location.href);
+            console.log('Target URL:', settingsUrl);
+            
+            if (!window.location.href.includes('settings/accounts')) {
+                console.log('Navigating to accounts settings...');
                 window.location.href = settingsUrl;
                 
                 // Wait for navigation
                 const checkNavigation = setInterval(() => {
+                    console.log('Checking navigation... Current URL:', window.location.href);
+                    
                     if (window.location.href.includes('settings/accounts')) {
+                        console.log('Navigation complete!');
                         clearInterval(checkNavigation);
-                        resolve();
+                        
+                        // Wait a bit more for the page content to load
+                        setTimeout(() => {
+                            resolve();
+                        }, 1500);
                     }
                 }, 500);
+                
+                // Fallback timeout
+                setTimeout(() => {
+                    console.log('Navigation timeout, proceeding anyway...');
+                    clearInterval(checkNavigation);
+                    resolve();
+                }, 10000);
             } else {
+                console.log('Already on accounts settings page');
                 resolve();
             }
         });
@@ -115,34 +144,218 @@
 
     // Trigger the POP3 check by finding and clicking the "Check mail now" button
     function triggerPOP3Check() {
-        // Look for the "Check mail now" button in the accounts settings
-        const checkButtons = document.querySelectorAll('input[type="button"], button, [role="button"]');
+        console.log('Starting POP3 check detection...');
         
-        for (const button of checkButtons) {
-            const buttonText = button.textContent || button.value || button.getAttribute('aria-label') || '';
-            if (buttonText.toLowerCase().includes('check mail now') || 
-                buttonText.toLowerCase().includes('check mail') ||
-                buttonText.toLowerCase().includes('refresh')) {
-                button.click();
-                showNotification('POP3 mail check initiated!', 'success');
-                return;
-            }
-        }
-        
-        // Alternative: look for elements that might contain the check mail functionality
-        const spans = document.querySelectorAll('span, div');
-        for (const span of spans) {
-            if (span.textContent && span.textContent.toLowerCase().includes('check mail now')) {
-                const clickableParent = span.closest('[role="button"], button, a');
-                if (clickableParent) {
-                    clickableParent.click();
-                    showNotification('POP3 mail check initiated!', 'success');
-                    return;
+        // Wait for page to fully load
+        setTimeout(() => {
+            // Try multiple strategies to find the check mail button
+            let found = false;
+            
+            // Strategy 1: Look for specific Gmail button patterns
+            const possibleSelectors = [
+                'input[value*="Check mail now"]',
+                'input[value*="check mail"]',
+                'button[title*="Check mail"]',
+                'button[aria-label*="Check mail"]',
+                '[data-tooltip*="check mail"]',
+                'input[type="button"][value="Check mail now"]',
+                'input[type="submit"][value*="Check"]'
+            ];
+            
+            for (const selector of possibleSelectors) {
+                const elements = document.querySelectorAll(selector);
+                console.log(`Trying selector: ${selector}, found ${elements.length} elements`);
+                
+                for (const element of elements) {
+                    if (element.offsetParent !== null) { // Check if visible
+                        console.log('Found visible check button:', element);
+                        
+                        // Try to trigger the click with multiple methods
+                        element.click();
+                        
+                        // Also try dispatching a click event
+                        const clickEvent = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        });
+                        element.dispatchEvent(clickEvent);
+                        
+                        // Verify the check was triggered
+                        setTimeout(() => {
+                            verifyPOP3Check();
+                        }, 2000);
+                        
+                        showNotification('POP3 mail check initiated!', 'success');
+                        found = true;
+                        return;
+                    }
                 }
             }
+            
+            // Strategy 2: Text-based search in all clickable elements
+            if (!found) {
+                console.log('Trying text-based search...');
+                const clickableElements = document.querySelectorAll('input, button, [role="button"], a, span[onclick], div[onclick]');
+                
+                for (const element of clickableElements) {
+                    const text = (element.textContent || element.value || element.title || element.getAttribute('aria-label') || '').toLowerCase();
+                    
+                    if ((text.includes('check mail') && text.includes('now')) || 
+                        text === 'check mail now' ||
+                        (text.includes('check') && text.includes('mail') && element.type === 'button')) {
+                        
+                        console.log('Found check button by text:', element, 'Text:', text);
+                        
+                        // Make sure it's visible
+                        if (element.offsetParent !== null && !element.disabled) {
+                            console.log('Clicking button:', element);
+                            
+                            // Try multiple click methods
+                            element.click();
+                            element.dispatchEvent(new MouseEvent('click', {
+                                bubbles: true,
+                                cancelable: true,
+                                view: window
+                            }));
+                            
+                            // Try focus + enter for input elements
+                            if (element.tagName === 'INPUT') {
+                                element.focus();
+                                element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                            }
+                            
+                            setTimeout(() => verifyPOP3Check(), 2000);
+                            showNotification('POP3 mail check initiated!', 'success');
+                            found = true;
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // Strategy 3: Look in specific Gmail settings sections
+            if (!found) {
+                console.log('Trying section-based search...');
+                
+                // Look for the "Check mail from other accounts" section
+                const sections = document.querySelectorAll('tr, .Ze, .aAv, .aAt');
+                
+                for (const section of sections) {
+                    const sectionText = section.textContent || '';
+                    
+                    if (sectionText.includes('Check mail from other accounts') || 
+                        sectionText.includes('POP3') ||
+                        sectionText.includes('other accounts')) {
+                        
+                        console.log('Found POP3 section:', section);
+                        
+                        // Look for buttons within this section
+                        const buttonsInSection = section.querySelectorAll('input[type="button"], input[type="submit"], button');
+                        
+                        for (const button of buttonsInSection) {
+                            const buttonText = (button.value || button.textContent || '').toLowerCase();
+                            
+                            if (buttonText.includes('check') || buttonText.includes('refresh') || buttonText.includes('now')) {
+                                console.log('Found button in POP3 section:', button);
+                                button.click();
+                                showNotification('POP3 mail check initiated!', 'success');
+                                found = true;
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Strategy 4: Look for forms and submit the right one
+            if (!found) {
+                console.log('Trying form-based search...');
+                const forms = document.querySelectorAll('form');
+                
+                for (const form of forms) {
+                    const formText = form.textContent || '';
+                    
+                    if (formText.includes('Check mail from other accounts') || formText.includes('POP3')) {
+                        const submitButtons = form.querySelectorAll('input[type="submit"], input[type="button"], button');
+                        
+                        for (const button of submitButtons) {
+                            const buttonText = (button.value || button.textContent || '').toLowerCase();
+                            
+                            if (buttonText.includes('check') && !buttonText.includes('delete') && !buttonText.includes('edit')) {
+                                console.log('Found form submit button:', button);
+                                button.click();
+                                showNotification('POP3 mail check initiated!', 'success');
+                                found = true;
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (!found) {
+                console.log('Could not find check mail button. Available buttons:');
+                const allButtons = document.querySelectorAll('input[type="button"], input[type="submit"], button');
+                allButtons.forEach((btn, index) => {
+                    console.log(`Button ${index}:`, btn, 'Text:', btn.textContent || btn.value, 'Visible:', btn.offsetParent !== null);
+                });
+                
+                showNotification('Could not find POP3 check button. Make sure POP3 accounts are configured.', 'warning');
+            }
+        }, 1000); // Wait 1 second for page to load
+    }
+
+    // Verify that the POP3 check actually happened
+    function verifyPOP3Check() {
+        console.log('Verifying POP3 check...');
+        
+        // Look for signs that the check is happening
+        const indicators = [
+            // Loading indicators
+            'div[role="progressbar"]',
+            '.loading',
+            '[aria-label*="loading"]',
+            '[aria-label*="checking"]',
+            
+            // Status messages
+            'div:contains("Checking")',
+            'span:contains("checking")',
+            'div:contains("mail")',
+            
+            // Gmail's specific loading elements
+            '.Kj-JD',
+            '.T-I-Js-Gs',
+            '.Vy'
+        ];
+        
+        let foundIndicator = false;
+        
+        for (const selector of indicators) {
+            const elements = document.querySelectorAll(selector);
+            if (elements.length > 0) {
+                console.log('Found loading/status indicator:', selector, elements);
+                foundIndicator = true;
+                break;
+            }
         }
         
-        showNotification('Could not find POP3 check button. Please check your settings.', 'warning');
+        // Also check for any text that indicates checking is happening
+        const bodyText = document.body.textContent || '';
+        if (bodyText.toLowerCase().includes('checking') || 
+            bodyText.toLowerCase().includes('retrieving') ||
+            bodyText.toLowerCase().includes('loading')) {
+            console.log('Found checking/loading text in page');
+            foundIndicator = true;
+        }
+        
+        if (foundIndicator) {
+            console.log('✓ POP3 check appears to be working!');
+            showNotification('POP3 check is running...', 'info');
+        } else {
+            console.log('⚠ Could not verify that POP3 check started');
+            showNotification('Check may not have started. Try again if needed.', 'warning');
+        }
     }
 
     // Show notification to user
