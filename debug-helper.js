@@ -44,9 +44,16 @@ function debugPOP3Setup() {
         }
     });
     
-    // Look for specific Gmail button patterns
-    console.log('\n=== Specific Button Searches ===');
+    // Look for specific Gmail patterns including span elements
+    console.log('\n=== Specific Button/Span Searches ===');
     const selectors = [
+        // Span-based (new Gmail style)
+        'span[role="link"]',
+        'span.rP.sA',
+        'span[tabindex="0"]',
+        'span:contains("Check mail now")',
+        
+        // Traditional buttons
         'input[value*="Check mail now"]',
         'input[value*="check mail"]',
         'input[value*="Check mail"]',
@@ -55,9 +62,33 @@ function debugPOP3Setup() {
     ];
     
     selectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        console.log(`${selector}: ${elements.length} elements`, elements);
+        try {
+            const elements = document.querySelectorAll(selector);
+            console.log(`${selector}: ${elements.length} elements`, elements);
+            
+            // For spans, also check their text content
+            if (selector.includes('span') && elements.length > 0) {
+                elements.forEach((el, i) => {
+                    console.log(`  Span ${i + 1} text: "${el.textContent}"`);
+                });
+            }
+        } catch (e) {
+            console.log(`${selector}: Error - ${e.message}`);
+        }
     });
+    
+    // Specifically look for "Check mail now" text
+    console.log('\n=== Text-based Search for "Check mail now" ===');
+    const allElements = document.querySelectorAll('*');
+    const checkMailElements = [];
+    
+    allElements.forEach(el => {
+        if (el.textContent && el.textContent.trim().toLowerCase() === 'check mail now') {
+            checkMailElements.push(el);
+        }
+    });
+    
+    console.log(`Found ${checkMailElements.length} elements with "Check mail now" text:`, checkMailElements);
     
     // Look for forms that might contain POP3 check
     console.log('\n=== Forms Analysis ===');

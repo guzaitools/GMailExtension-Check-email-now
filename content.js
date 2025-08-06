@@ -151,67 +151,67 @@
             // Try multiple strategies to find the check mail button
             let found = false;
             
-            // Strategy 1: Look for specific Gmail button patterns
-            const possibleSelectors = [
-                'input[value*="Check mail now"]',
-                'input[value*="check mail"]',
-                'button[title*="Check mail"]',
-                'button[aria-label*="Check mail"]',
-                '[data-tooltip*="check mail"]',
-                'input[type="button"][value="Check mail now"]',
-                'input[type="submit"][value*="Check"]'
-            ];
+            // Strategy 1: Look for specific Gmail span elements first
+            console.log('Strategy 1: Looking for Gmail span elements...');
             
-            for (const selector of possibleSelectors) {
-                const elements = document.querySelectorAll(selector);
-                console.log(`Trying selector: ${selector}, found ${elements.length} elements`);
+            // First, specifically target Gmail's span-based "Check mail now" button
+            const spanElements = document.querySelectorAll('span[role="link"], span.rP.sA, span[tabindex="0"]');
+            console.log(`Found ${spanElements.length} potential span elements`);
+            
+            for (const span of spanElements) {
+                const spanText = (span.textContent || '').trim().toLowerCase();
+                console.log('Checking span:', span, 'Text:', spanText);
                 
-                for (const element of elements) {
-                    if (element.offsetParent !== null) { // Check if visible
-                        console.log('Found visible check button:', element);
-                        
-                        // Try to trigger the click with multiple methods
-                        element.click();
-                        
-                        // Also try dispatching a click event
-                        const clickEvent = new MouseEvent('click', {
-                            bubbles: true,
-                            cancelable: true,
-                            view: window
-                        });
-                        element.dispatchEvent(clickEvent);
-                        
-                        // Verify the check was triggered
-                        setTimeout(() => {
-                            verifyPOP3Check();
-                        }, 2000);
-                        
-                        showNotification('POP3 mail check initiated!', 'success');
-                        found = true;
-                        return;
-                    }
+                if (spanText === 'check mail now' || spanText.includes('check mail now')) {
+                    console.log('✓ Found Gmail Check mail now span!', span);
+                    
+                    // Try multiple click methods for span elements
+                    span.click();
+                    
+                    // Dispatch click event
+                    span.dispatchEvent(new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    }));
+                    
+                    // Try mousedown/mouseup sequence
+                    span.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                    span.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                    
+                    // Focus and keyboard events for accessibility
+                    span.focus();
+                    span.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+                    span.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+                    
+                    setTimeout(() => verifyPOP3Check(), 2000);
+                    showNotification('POP3 mail check initiated via span!', 'success');
+                    found = true;
+                    return;
                 }
             }
             
-            // Strategy 2: Text-based search in all clickable elements
+            // Strategy 2: Traditional button patterns
             if (!found) {
-                console.log('Trying text-based search...');
-                const clickableElements = document.querySelectorAll('input, button, [role="button"], a, span[onclick], div[onclick]');
+                console.log('Strategy 2: Looking for traditional buttons...');
+                const possibleSelectors = [
+                    'input[value*="Check mail now"]',
+                    'input[value*="check mail"]',
+                    'button[title*="Check mail"]',
+                    'button[aria-label*="Check mail"]',
+                    '[data-tooltip*="check mail"]',
+                    'input[type="button"][value="Check mail now"]',
+                    'input[type="submit"][value*="Check"]'
+                ];
                 
-                for (const element of clickableElements) {
-                    const text = (element.textContent || element.value || element.title || element.getAttribute('aria-label') || '').toLowerCase();
+                for (const selector of possibleSelectors) {
+                    const elements = document.querySelectorAll(selector);
+                    console.log(`Trying selector: ${selector}, found ${elements.length} elements`);
                     
-                    if ((text.includes('check mail') && text.includes('now')) || 
-                        text === 'check mail now' ||
-                        (text.includes('check') && text.includes('mail') && element.type === 'button')) {
-                        
-                        console.log('Found check button by text:', element, 'Text:', text);
-                        
-                        // Make sure it's visible
-                        if (element.offsetParent !== null && !element.disabled) {
-                            console.log('Clicking button:', element);
+                    for (const element of elements) {
+                        if (element.offsetParent !== null) { // Check if visible
+                            console.log('Found visible check button:', element);
                             
-                            // Try multiple click methods
                             element.click();
                             element.dispatchEvent(new MouseEvent('click', {
                                 bubbles: true,
@@ -219,14 +219,57 @@
                                 view: window
                             }));
                             
-                            // Try focus + enter for input elements
-                            if (element.tagName === 'INPUT') {
+                            setTimeout(() => verifyPOP3Check(), 2000);
+                            showNotification('POP3 mail check initiated!', 'success');
+                            found = true;
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // Strategy 3: Comprehensive text-based search including all span elements
+            if (!found) {
+                console.log('Strategy 3: Comprehensive text-based search...');
+                const clickableElements = document.querySelectorAll('input, button, [role="button"], [role="link"], a, span, div[onclick], span[tabindex]');
+                
+                for (const element of clickableElements) {
+                    const text = (element.textContent || element.value || element.title || element.getAttribute('aria-label') || '').toLowerCase().trim();
+                    
+                    if (text === 'check mail now' ||
+                        (text.includes('check mail') && text.includes('now')) || 
+                        (text.includes('check') && text.includes('mail') && (element.type === 'button' || element.role === 'button' || element.role === 'link'))) {
+                        
+                        console.log('Found check element by text:', element, 'Text:', text);
+                        
+                        // Make sure it's visible and interactable
+                        if (element.offsetParent !== null && !element.disabled) {
+                            console.log('Clicking element:', element);
+                            
+                            // Try multiple click methods - especially important for span elements
+                            element.click();
+                            
+                            element.dispatchEvent(new MouseEvent('click', {
+                                bubbles: true,
+                                cancelable: true,
+                                view: window
+                            }));
+                            
+                            // For span elements, also try mousedown/mouseup
+                            if (element.tagName === 'SPAN') {
+                                element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+                                element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+                            }
+                            
+                            // Try focus + enter for elements with tabindex
+                            if (element.hasAttribute('tabindex') || element.tagName === 'INPUT') {
                                 element.focus();
-                                element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                                element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+                                element.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
                             }
                             
                             setTimeout(() => verifyPOP3Check(), 2000);
-                            showNotification('POP3 mail check initiated!', 'success');
+                            showNotification('POP3 mail check initiated via text search!', 'success');
                             found = true;
                             return;
                         }
